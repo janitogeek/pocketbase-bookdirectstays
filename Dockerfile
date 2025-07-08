@@ -2,37 +2,32 @@ FROM alpine:latest
 
 # Install required packages
 RUN apk add --no-cache \
-    unzip \
-    ca-certificates \
-    wget
+    ca-certificates
 
 # Create app directory
 WORKDIR /app
 
-# Download PocketBase
-RUN wget https://github.com/pocketbase/pocketbase/releases/download/v0.22.6/pocketbase_0.22.6_linux_amd64.zip \
-    && unzip pocketbase_0.22.6_linux_amd64.zip \
-    && chmod +x pocketbase \
-    && rm pocketbase_0.22.6_linux_amd64.zip
+# Copy PocketBase binary
+COPY pocketbase ./pocketbase
+RUN chmod +x pocketbase
 
-# Create data directory
-RUN mkdir -p /app/pb_data
+# Copy database and migrations
+COPY pb_data ./pb_data
+COPY pb_migrations ./pb_migrations
+COPY pb_hooks ./pb_hooks
 
-<<<<<<< HEAD
-# Create start script
+# Ensure migrations run and database is initialized
+RUN chmod -R 755 pb_migrations pb_hooks
+
+# Create start script that ensures migrations run
 RUN echo '#!/bin/sh' > start.sh && \
-    echo 'exec ./pocketbase serve --http=0.0.0.0:$PORT' >> start.sh && \
+    echo 'echo "Starting PocketBase..."' >> start.sh && \
+    echo 'echo "Running migrations..."' >> start.sh && \
+    echo 'exec ./pocketbase serve --http=0.0.0.0:$PORT --migrationsDir=./pb_migrations' >> start.sh && \
     chmod +x start.sh
 
 # Expose port
 EXPOSE 8080
 
 # Start PocketBase
-CMD ["./start.sh"] 
-=======
-# Expose port (Render will set PORT environment variable)
-EXPOSE 8080
-
-# Start PocketBase
-CMD ["./pocketbase", "serve", "--http=0.0.0.0:8080"]
->>>>>>> fa25d411cffa6bfee1b1683a726e6acf002ee93f
+CMD ["./start.sh"]
