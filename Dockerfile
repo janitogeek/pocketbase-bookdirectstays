@@ -18,6 +18,7 @@ RUN wget https://github.com/pocketbase/pocketbase/releases/download/v0.22.6/pock
 # Create data directory
 RUN mkdir -p /app/pb_data
 
+<<<<<<< HEAD
 # Create start script
 RUN echo '#!/bin/sh' > start.sh && \
     echo 'exec ./pocketbase serve --http=0.0.0.0:$PORT' >> start.sh && \
@@ -28,3 +29,10 @@ EXPOSE 8080
 
 # Start PocketBase
 CMD ["./start.sh"] 
+=======
+# Expose port (Render will set PORT environment variable)
+EXPOSE 8080
+
+# Start PocketBase
+CMD ["./pocketbase", "serve", "--http=0.0.0.0:8080"]
+>>>>>>> fa25d411cffa6bfee1b1683a726e6acf002ee93f
